@@ -263,7 +263,7 @@
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Baskerville Old Face", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.Black;
-            this.label2.Location = new System.Drawing.Point(188, 35);
+            this.label2.Location = new System.Drawing.Point(323, 35);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(178, 45);
             this.label2.TabIndex = 1;

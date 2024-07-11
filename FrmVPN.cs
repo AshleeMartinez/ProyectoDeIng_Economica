@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace ProyectoIng_Economica
@@ -15,21 +16,21 @@ namespace ProyectoIng_Economica
         {
             try
             {
-                double inversioInicial = double.Parse(txtInversionInicial.Text);
-                double tasaDescuento = double.Parse(txtTasaDescuento.Text) / 100;
+                double inversionInicial = ObtenerValorNumerico(txtInversionInicial.Text, "Inversión Inicial");
+                double tasaDescuento = ObtenerValorNumerico(txtTasaDescuento.Text, "Tasa de Descuento") / 100;
 
-                double vpn = -inversioInicial;
-
-                List<object> resultados = new List<object>();
-
-                resultados.Add(new { Año = 0, FNE = -inversioInicial, VPN = -inversioInicial });
+                double vpn = -inversionInicial;
+                List<object> resultados = new List<object>
+        {
+            new { Año = 0, FNE = -inversionInicial, VPN = -inversionInicial }
+        };
 
                 foreach (DataGridViewRow row in dgvFlujosNetos.Rows)
                 {
                     if (row.Cells[0].Value != null && row.Cells[1].Value != null)
                     {
-                        int año = int.Parse(row.Cells[0].Value.ToString());
-                        double flujoNetoEfectivo = double.Parse(row.Cells[1].Value.ToString());
+                        int año = ObtenerValorEntero(row.Cells[0].Value.ToString(), row.Index + 1, "Año");
+                        double flujoNetoEfectivo = ObtenerValorNumerico(row.Cells[1].Value.ToString(), row.Index + 1, "Flujo Neto Efectivo");
 
                         double valorPresenteNeto = flujoNetoEfectivo / Math.Pow(1 + tasaDescuento, año);
                         vpn += valorPresenteNeto;
@@ -49,28 +50,45 @@ namespace ProyectoIng_Economica
                                            resultado.GetType().GetProperty("VPN").GetValue(resultado));
                 }
             }
+            catch (FormatException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            catch (OverflowException ex)
+            {
+                MessageBox.Show("ERROR: Número demasiado grande. " + ex.Message);
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("ERROR: " + ex.Message);
             }
+
+
+
         }
+
+
+
+
+
+
 
         private void btnLimpiar_Click(object sender, EventArgs e)
         {
             txtInversionInicial.Clear();
             txtTasaDescuento.Clear();
             txtAnios.Clear();
-
             dgvFlujosNetos.Rows.Clear();
             dgvResultados.Rows.Clear();
         }
 
+
+
+
         private void txtAnios_TextChanged(object sender, EventArgs e)
         {
-            try
+            if (int.TryParse(txtAnios.Text, out int años))
             {
-                int años = int.Parse(txtAnios.Text);
-
                 dgvFlujosNetos.Rows.Clear(); // Limpiar el DataGridView antes de llenarlo
 
                 for (int año = 1; año <= años; año++)
@@ -78,16 +96,47 @@ namespace ProyectoIng_Economica
                     dgvFlujosNetos.Rows.Add(año, ""); // Agregar fila con el año, FNE inicialmente vacío
                 }
             }
-            catch (FormatException)
+            else
             {
-                // Manejar el caso en el que el usuario ingrese un valor no válido (no numérico)
                 dgvFlujosNetos.Rows.Clear(); // Limpiar el DataGridView si hay un error
             }
         }
 
+       
         private void tbgCalculo_Click(object sender, EventArgs e)
         {
 
+
+
         }
+
+        private double ObtenerValorNumerico(string valor, string nombreCampo)
+        {
+            if (!double.TryParse(valor, out double resultado))
+            {
+                throw new FormatException($"ERROR: Formato inválido en el campo '{nombreCampo}'. Por favor, asegúrese de que el valor es numérico.");
+            }
+            return resultado;
+        }
+
+        private double ObtenerValorNumerico(string valor, int fila, string nombreCampo)
+        {
+            if (!double.TryParse(valor, out double resultado))
+            {
+                throw new FormatException($"ERROR: Formato inválido en la columna '{nombreCampo}' en la fila {fila}. Valor: {valor}. Por favor, asegúrese de que el valor es numérico.");
+            }
+            return resultado;
+        }
+
+        private int ObtenerValorEntero(string valor, int fila, string nombreCampo)
+        {
+            if (!int.TryParse(valor, out int resultado))
+            {
+                throw new FormatException($"ERROR: Formato inválido en la columna '{nombreCampo}' en la fila {fila}. Valor: {valor}. Por favor, asegúrese de que el valor es numérico.");
+            }
+            return resultado;
+        }
+
+
     }
 }
